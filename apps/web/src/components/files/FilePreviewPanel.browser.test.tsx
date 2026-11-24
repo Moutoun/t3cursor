@@ -497,7 +497,13 @@ describe("source file scroll", () => {
           clickCount: 1,
         });
 
-      const startX = direction === "up" ? startRect.left + 140 : startRect.left + 2;
+      const startText = startRow!.querySelector("[data-char]")?.firstChild;
+      expect(startText).toBeInstanceOf(Text);
+      const anchorRange = document.createRange();
+      anchorRange.setStart(startText!, `line ${startLine} `.length);
+      anchorRange.collapse(true);
+      const startX =
+        direction === "up" ? anchorRange.getBoundingClientRect().left + 1 : startRect.left + 2;
       // The editor records the drag anchor on the press's selectionchange; drag only after it.
       const anchored = new Promise((resolve) =>
         document.addEventListener("selectionchange", resolve, { once: true }),
