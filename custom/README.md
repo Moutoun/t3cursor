@@ -23,9 +23,13 @@ command updates source only; it does not install or replace the running applicat
 
 For the latest successful merge, `node custom/update-upstream.mjs rollback` creates and
 validates a revert in another worktree before applying it. Rollback requires the merge to
-remain at HEAD. After a rollback, reconcile or reapply the reverted changes manually before
-running another update, because Git still records the upstream merge in history. The
-command never resets or deletes user data. Neither command is connected to Settings yet.
+remain at HEAD. A later update is refused while a rollback remains in the branch history,
+even after additional commits, because Git still records the upstream merge as integrated.
+To resume, reapply the rollback with `git revert <rollback-commit>` or reconcile those
+changes manually. After reviewing and testing the result, remove the corresponding marker
+with `git update-ref -d refs/t3cursor/rollbacks/<rollback-commit>`. List the markers with
+`git for-each-ref refs/t3cursor/rollbacks/`. The command never resets or deletes user data.
+Neither command is connected to Settings yet.
 
 ## Custom modifications
 

@@ -21,7 +21,19 @@ function run(cwd, command, args, { inherit = false } = {}) {
   return result.stdout?.trim() ?? "";
 }
 
-const git = (cwd, ...args) => run(cwd, "git", args);
+const git = (cwd, ...args) => run(cwd, "git", ["-c", "core.longpaths=true", ...args]);
+
+function isAncestor(cwd, ancestor, descendant) {
+  const result = NodeChildProcess.spawnSync(
+    "git",
+    ["-c", "core.longpaths=true", "merge-base", "--is-ancestor", ancestor, descendant],
+    { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], windowsHide: true },
+  );
+  if (result.error) throw result.error;
+  if (result.status === 0) return true;
+  if (result.status === 1) return false;
+  throw new Error(`Could not check rollback history: ${result.stderr?.trim() || result.status}`);
+}
 
 function ensureReady(cwd, expectedHead) {
   if (git(cwd, "branch", "--show-current") !== branch) {
@@ -88,6 +100,7 @@ function applyCandidate(cwd, before, candidate) {
   } catch (error) {
     throw new Error(
       `Could not apply tested commit ${candidate}; backup ${backupRef} remains. ${error.message}`,
+      { cause: error },
     );
   }
   return { before, after: candidate, backupRef };
@@ -96,14 +109,21 @@ function applyCandidate(cwd, before, candidate) {
 export function update(cwd, validate = testCandidate) {
   cwd = NodeFS.realpathSync(cwd);
   const before = ensureReady(cwd);
-  try {
-    git(cwd, "rev-parse", "--verify", `refs/t3cursor/rollbacks/${before}`);
-  } catch {
-    return updateFromUpstream(cwd, before, validate);
+  const markers = git(cwd, "for-each-ref", "--format=%(refname)", "refs/t3cursor/rollbacks/")
+    .split("\n")
+    .filter(Boolean);
+  for (const marker of markers) {
+    const rollbackCommit = marker.slice(marker.lastIndexOf("/") + 1);
+    if (!/^[0-9a-f]{40,64}$/.test(rollbackCommit)) {
+      throw new Error(`Invalid rollback marker ${marker}; inspect it before updating.`);
+    }
+    if (isAncestor(cwd, rollbackCommit, before)) {
+      throw new Error(
+        `This branch contains rollback ${rollbackCommit}. Reapply or reconcile its changes, then remove ${marker}; see custom/README.md.`,
+      );
+    }
   }
-  throw new Error(
-    "This branch was rolled back. Reapply or reconcile the reverted update before checking for another update; Git otherwise considers it integrated.",
-  );
+  return updateFromUpstream(cwd, before, validate);
 }
 
 function updateFromUpstream(cwd, before, validate) {
@@ -126,6 +146,7 @@ function updateFromUpstream(cwd, before, validate) {
       } catch (error) {
         throw new Error(
           `Upstream merge failed or has conflicts. The working branch was not modified. ${error.message}`,
+          { cause: error },
         );
       }
       const candidate = git(candidatePath, "rev-parse", "HEAD");
@@ -160,7 +181,9 @@ export function rollback(cwd, validate = testCandidate) {
     try {
       commitGit(candidatePath, "revert", "--no-edit", "-m", "1", before);
     } catch (error) {
-      throw new Error(`Rollback failed; the working branch was not modified. ${error.message}`);
+      throw new Error(`Rollback failed; the working branch was not modified. ${error.message}`, {
+        cause: error,
+      });
     }
     const candidate = git(candidatePath, "rev-parse", "HEAD");
     if (

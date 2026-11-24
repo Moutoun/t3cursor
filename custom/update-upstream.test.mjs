@@ -76,7 +76,11 @@ NodeTest.test(
         NodeFS.readFileSync(NodePath.join(f.checkout, "custom.txt"), "utf8"),
         "custom\n",
       );
-      NodeAssert.throws(() => update(f.checkout, () => {}), /rolled back/);
+      NodeAssert.throws(() => update(f.checkout, () => {}), /contains rollback/);
+      NodeFS.writeFileSync(NodePath.join(f.checkout, "later.txt"), "later\n");
+      git(f.checkout, "add", "later.txt");
+      git(f.checkout, "commit", "-m", "later custom work");
+      NodeAssert.throws(() => update(f.checkout, () => {}), /contains rollback/);
     } finally {
       f.dispose();
     }
@@ -160,6 +164,27 @@ NodeTest.test("does not overwrite an ignored file or update a dirty checkout", (
     );
     NodeFS.writeFileSync(NodePath.join(f.checkout, "custom.txt"), "dirty\n");
     NodeAssert.throws(() => update(f.checkout, () => {}), /Commit or remove/);
+  } finally {
+    f.dispose();
+  }
+});
+
+NodeTest.test("merges long Windows paths even when the repository disables Git long paths", () => {
+  const f = fixture();
+  try {
+    git(f.checkout, "config", "core.longpaths", "false");
+    const directory = "d".repeat(160);
+    const filename = "f".repeat(65) + ".txt";
+    NodeFS.mkdirSync(NodePath.join(f.upstream, directory));
+    NodeFS.writeFileSync(NodePath.join(f.upstream, directory, filename), "long path\n");
+    git(f.upstream, "-c", "core.longpaths=true", "add", ".");
+    git(f.upstream, "-c", "core.longpaths=true", "commit", "-m", "add long path");
+    const result = update(f.checkout, () => {});
+    NodeAssert.equal(git(f.checkout, "rev-parse", "HEAD"), result.after);
+    NodeAssert.equal(
+      NodeFS.readFileSync(NodePath.join(f.checkout, directory, filename), "utf8"),
+      "long path\n",
+    );
   } finally {
     f.dispose();
   }

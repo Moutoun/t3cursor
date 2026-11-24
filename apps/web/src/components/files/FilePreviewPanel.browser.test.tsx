@@ -446,7 +446,7 @@ describe("source file scroll", () => {
       };
 
       await using screen = await render(
-        <div style={{ width: 560, height: 400, marginTop: 80, display: "flex", flexDirection: "column" }}>
+        <div style={{ width: 560, height: 400, display: "flex", flexDirection: "column" }}>
           {filePreview("notes.md")}
         </div>,
       );
@@ -487,7 +487,6 @@ describe("source file scroll", () => {
       const nearEdgeY = direction === "down" ? scrollerRect.bottom - 5 : scrollerRect.top + 5;
       const outsideEdgeY = direction === "down" ? scrollerRect.bottom + 60 : scrollerRect.top - 60;
       const frame = window.frameElement?.getBoundingClientRect();
-      console.log("drag geometry", {start: startRect.toJSON(), scroller: scrollerRect.toJSON(), frame: frame?.toJSON(), scrollTop: scroller.scrollTop, nearEdgeY, outsideEdgeY});
       const mouse = (type: "mousePressed" | "mouseMoved" | "mouseReleased", x: number, y: number) =>
         cdp().send("Input.dispatchMouseEvent", {
           type,
@@ -505,11 +504,8 @@ describe("source file scroll", () => {
       );
       await mouse("mousePressed", startX, startRect.top + 5);
       await anchored;
-      console.log("after press", {target: shadowRoot()?.elementFromPoint(startX, startRect.top + 5)?.outerHTML.slice(0, 300), selection: shadowRoot()?.getSelection()?.toString(), anchor: shadowRoot()?.getSelection()?.anchorNode?.parentElement?.outerHTML.slice(0, 200)});
       await mouse("mouseMoved", startRect.left + 80, nearEdgeY);
-      console.log("after near", {target: document.elementFromPoint(startRect.left + 80, nearEdgeY)?.outerHTML.slice(0, 300), scrollTop: scroller.scrollTop, selection: document.getSelection()?.toString()});
       await mouse("mouseMoved", startRect.left + 80, outsideEdgeY);
-      console.log("after outside", {target: document.elementFromPoint(startRect.left + 80, outsideEdgeY)?.outerHTML.slice(0, 300), scrollTop: scroller.scrollTop, selection: document.getSelection()?.toString()});
       await vi.waitFor(() => {
         const firstMounted = Number(rows()[0]?.getAttribute("data-line"));
         if (direction === "down") {
