@@ -38,10 +38,7 @@ export const resolveUserDataPath = Effect.fn("desktop.userData.resolveUserDataPa
     readonly platform: NodeJS.Platform;
   }) {
     const path = yield* Path.Path;
-    return path.join(
-      input.appDataDirectory,
-      input.isDevelopment ? "cursor-custom-dev" : "cursor-custom",
-    );
+    return path.join(input.appDataDirectory, input.isDevelopment ? "t3cursor-dev" : "t3cursor");
   },
 );
 

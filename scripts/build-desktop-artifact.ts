@@ -63,7 +63,7 @@ import { Command, Flag } from "effect/cli";
 import { ChildProcess, ChildProcessSpawner } from "effect/process";
 
 const LINUX_ICON_SIZES = [16, 22, 24, 32, 48, 64, 128, 256, 512] as const;
-const DESKTOP_APP_ID = "local.codeatelier";
+const DESKTOP_APP_ID = "com.t3cursor.app";
 const APPLE_TEAM_ID_PATTERN = /^[A-Z0-9]{10}$/u;
 
 const BuildPlatform = Schema.Literals(["mac", "linux", "win"]);
@@ -2799,8 +2799,8 @@ export function resolvePackageManagerUserAgent(packageManager: string): string {
 
 export function resolveDesktopProductName(version: string): string {
   return resolveDesktopUpdateChannel(version) === "nightly"
-    ? "Code Atelier (Nightly)"
-    : (desktopPackageJson.productName ?? "Code Atelier");
+    ? "T3Cursor (Nightly)"
+    : (desktopPackageJson.productName ?? "T3Cursor");
 }
 
 export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
@@ -2823,7 +2823,9 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
     afterPack: (yield* Path.Path).join(yield* RepoRoot, "scripts/prepare-server-compile-cache.cjs"),
     appId: DESKTOP_APP_ID,
     productName: resolveDesktopProductName(version),
-    artifactName: "Code-Atelier-${version}-${arch}.${ext}",
+    artifactName:
+      platform === "win" ? "T3Cursor-Setup.${ext}" : "T3Cursor-${version}-${arch}.${ext}",
+    ...(platform === "win" ? { protocols: [{ name: "T3Cursor", schemes: ["t3cursor"] }] } : {}),
     electronLanguages: [...DESKTOP_ELECTRON_LANGUAGES],
     files: [
       ...DESKTOP_FILE_EXCLUSIONS,
@@ -3958,7 +3960,7 @@ const buildDesktopArtifactUnlocked = Effect.fn("buildDesktopArtifactUnlocked")(f
       ? path.join(stageAppDir, WINDOWS_SERVER_RESOURCE_SOURCE_DIR, WINDOWS_SERVER_ASAR_RESOURCE)
       : undefined;
   const stagePackageJson: StagePackageJson = {
-    name: "t3code",
+    name: "t3cursor",
     version: appVersion,
     buildVersion: appVersion,
     t3codeCommitHash: commitHash,

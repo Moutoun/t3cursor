@@ -9,12 +9,26 @@ not available locally, the result is inconclusive and the script reports that ch
 be available. Network and Git errors cause a nonzero exit status.
 
 The desktop application's existing updater installs official binary releases; it is not a
-source merge mechanism and must not be used to update a customized build. No automated
-source merge or rollback mechanism has been implemented yet.
+source merge mechanism and must not be used to update a customized build.
+
+To merge the official default branch into this source checkout, activate Vite+ and run
+`node custom/update-upstream.mjs update`. The command requires a clean
+`custom/cursor-experience` branch, creates a neighboring temporary Git worktree, and runs
+dependency installation, the repository's changed-code checks, and a build there before
+fast-forwarding the checkout. Merge conflicts, validation failures, ignored-file
+collisions, or a changed checkout stop the update. A Git backup ref is retained. The
+command updates source only; it does not install or replace the running application.
+
+For the latest successful merge, `node custom/update-upstream.mjs rollback` creates and
+validates a revert in another worktree before applying it. Rollback requires the merge to
+remain at HEAD. After a rollback, reconcile or reapply the reverted changes manually before
+running another update, because Git still records the upstream merge in history. The
+command never resets or deletes user data. Neither command is connected to Settings yet.
 
 ## Custom modifications
 
 - `custom/check-upstream.mjs`: read-only upstream check.
+- `custom/update-upstream.mjs`: tested source-update and rollback commands.
 - `custom/README.md`: maintenance notes for this checkout.
 - `apps/desktop/src/app/DesktopStatePaths.ts`: the desktop backend defaults to
   `~/.t3-custom`, keeping its state separate from the official app. An explicit
