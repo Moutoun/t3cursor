@@ -10,8 +10,9 @@ be available. Network and Git errors cause a nonzero exit status.
 The GitHub Actions upstream check also runs daily and records the comparison in its job
 summary; it never merges or installs updates.
 
-The desktop application's existing updater installs official binary releases; it is not a
-source merge mechanism and must not be used to update a customized build.
+The official binary updater is disabled at packaged desktop startup. The source workflow
+below does not update installed binaries; a T3Cursor release update channel is not yet
+implemented.
 
 To merge the official default branch into this source checkout, activate Vite+ and run
 `node custom/update-upstream.mjs update`. The command requires a clean
@@ -46,3 +47,14 @@ Neither command is connected to Settings yet.
 - `apps/desktop/src/app/DesktopEnvironment.ts`, `apps/desktop/package.json`, and
   `scripts/build-desktop-artifact.ts`: custom desktop display name and application ID.
   Installer behavior and protocol registration still require end-to-end verification.
+- `apps/desktop/src/boot.ts` and `apps/desktop/src/app/DesktopApp.ts`: disable the
+  official binary updater, avoid automatic installation of the `t3` command, and avoid
+  automatically reading the official legacy profile.
+- `apps/desktop/src/electron/ElectronProtocol.ts` and related shared URL helpers: use
+  the T3Cursor protocol for the desktop and accept its provider-auth return URLs.
+- `apps/web/src/components/chat/`: expose Agent and Plan for providers that advertise
+  the existing interaction-mode capability. Strict read-only Ask is not implemented.
+- `apps/web/src/components/files/MonacoFileEditor.tsx` and `FilePreviewPanel.tsx`:
+  add an optional, lazy-loaded Monaco editor to the existing file panel. Accept/Reject
+  controls are not implemented.
+- `.github/workflows/t3cursor-*.yml`: Windows build/release workflow and upstream check.
