@@ -206,7 +206,9 @@ const runStubbedDesktop = (stub: StubbedDesktop) =>
           Layer.mock(BrowserImport.BrowserImport, {}),
           Layer.mock(ChildProcessSpawner.ChildProcessSpawner, {}),
           Layer.mock(DesktopBackendConfiguration.DesktopBackendConfiguration, {}),
-          Layer.mock(DesktopCliCommand.DesktopCliCommand, {}),
+          Layer.mock(DesktopCliCommand.DesktopCliCommand, {
+            installOnFirstLaunch: Effect.die("desktop startup must not install the t3 command"),
+          }),
           Layer.mock(DesktopClientSettings.DesktopClientSettings, {}),
           Layer.mock(DesktopConnectionCatalogStore.DesktopConnectionCatalogStore, {}),
           Layer.mock(DesktopIpc.DesktopIpc, {}),
