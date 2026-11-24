@@ -1,0 +1,35 @@
+﻿name: Check upstream T3 Code
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 8 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Compare upstream default branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags https://github.com/pingdotgg/t3code.git main
+          upstream=$(git rev-parse FETCH_HEAD)
+          current=$(git rev-parse HEAD)
+          if git merge-base --is-ancestor "$upstream" "$current"; then
+            status="The current branch contains the upstream main commit."
+          else
+            status="Upstream main has changes that are not present here. Review them before updating."
+          fi
+          {
+            echo '## Upstream check'
+            echo "$status"
+            echo "Upstream: \`$upstream\`"
+            echo "T3Cursor: \`$current\`"
+          } >> "$GITHUB_STEP_SUMMARY"

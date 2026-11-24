@@ -7,6 +7,8 @@ Run `node custom/check-upstream.mjs` to compare the checked-out commit with the 
 upstream default branch without fetching or modifying Git refs. If the upstream commit is
 not available locally, the result is inconclusive and the script reports that changes may
 be available. Network and Git errors cause a nonzero exit status.
+The GitHub Actions upstream check also runs daily and records the comparison in its job
+summary; it never merges or installs updates.
 
 The desktop application's existing updater installs official binary releases; it is not a
 source merge mechanism and must not be used to update a customized build.
