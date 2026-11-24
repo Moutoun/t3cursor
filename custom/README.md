@@ -21,4 +21,7 @@ source merge or rollback mechanism has been implemented yet.
   `T3CODE_HOME` still overrides this default.
 - `apps/desktop/src/app/DesktopUserData.ts`: custom Electron profiles are separate
   from official profiles; no official browser data is copied automatically. Installer
-  identity isolation is not yet implemented.
+  identity isolation has not yet been verified with an installed build.
+- `apps/desktop/src/app/DesktopEnvironment.ts`, `apps/desktop/package.json`, and
+  `scripts/build-desktop-artifact.ts`: custom desktop display name and application ID.
+  Installer behavior and protocol registration still require end-to-end verification.

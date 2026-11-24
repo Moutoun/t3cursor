@@ -48,6 +48,7 @@ describe("DesktopEnvironment", () => {
       });
 
       assert.equal(environment.appRoot, "/install/resources/app.asar");
+      assert.equal(environment.appUserModelId, "local.codeatelier");
       assert.equal(environment.serverRoot, "/install/resources/server.asar");
       assert.equal(
         environment.backendEntryPath,
