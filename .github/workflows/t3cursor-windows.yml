@@ -1,0 +1,67 @@
+﻿name: T3Cursor Windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "t3cursor-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Vite+ and dependencies
+        shell: pwsh
+        run: |
+          $env:VP_HOME = "$env:RUNNER_TEMP\t3cursor-vite"
+          Invoke-WebRequest https://vite.plus/ps1 -OutFile "$env:RUNNER_TEMP\install-vite.ps1"
+          & "$env:RUNNER_TEMP\install-vite.ps1"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          . "$env:VP_HOME\env.ps1"
+          vp env install node@26.13.1
+          vp env exec --node 26.13.1 vp install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run focused checks
+        shell: pwsh
+        run: |
+          $env:VP_HOME = "$env:RUNNER_TEMP\t3cursor-vite"
+          . "$env:VP_HOME\env.ps1"
+          vp env exec --node 26.13.1 vp test run apps/desktop/src/app/DesktopEnvironment.test.ts apps/desktop/src/app/DesktopUserData.test.ts apps/desktop/src/electron/ElectronProtocol.test.ts packages/shared/src/codexAuthHandoff.test.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          vp env exec --node 26.13.1 node --test custom/update-upstream.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build Windows installer
+        shell: pwsh
+        run: |
+          $env:VP_HOME = "$env:RUNNER_TEMP\t3cursor-vite"
+          . "$env:VP_HOME\env.ps1"
+          vp env exec --node 26.13.1 vp run dist:desktop:win
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: T3Cursor-Windows
+          path: release/T3Cursor-Setup.exe
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/t3cursor-v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: T3Cursor-Windows
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" T3Cursor-Setup.exe --title "$TAG" --generate-notes
