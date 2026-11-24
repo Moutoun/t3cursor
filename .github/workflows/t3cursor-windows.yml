@@ -20,7 +20,12 @@ jobs:
         shell: pwsh
         run: |
           $env:VP_HOME = "$env:RUNNER_TEMP\t3cursor-vite"
+          $env:VP_VERSION = "1.8.0"
           Invoke-WebRequest https://vite.plus/ps1 -OutFile "$env:RUNNER_TEMP\install-vite.ps1"
+          $actualHash = (Get-FileHash "$env:RUNNER_TEMP\install-vite.ps1" -Algorithm SHA256).Hash
+          if ($actualHash -ne "9D8DE06BC31E7B9E68FC7BB32CAAFE5BB34C881368EF3B96D0F02BD62E668C86") {
+            throw "Vite+ installer checksum changed; review the installer before updating the pinned hash."
+          }
           & "$env:RUNNER_TEMP\install-vite.ps1"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           . "$env:VP_HOME\env.ps1"
