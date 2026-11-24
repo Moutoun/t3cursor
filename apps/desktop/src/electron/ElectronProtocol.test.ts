@@ -21,6 +21,11 @@ import * as ElectronProtocol from "./ElectronProtocol.ts";
 const layerProtocol = ElectronProtocol.layer.pipe(Layer.provide(NodeServices.layer));
 
 describe("ElectronProtocol", () => {
+  it("uses isolated schemes for T3Cursor", () => {
+    assert.equal(ElectronProtocol.getDesktopScheme(false), "t3cursor");
+    assert.equal(ElectronProtocol.getDesktopScheme(true), "t3cursor-dev");
+  });
+
   beforeEach(() => {
     handleMock.mockReset();
     netFetchMock.mockReset();

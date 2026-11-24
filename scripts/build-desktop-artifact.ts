@@ -2910,7 +2910,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
       protocols: [
         {
           name: "T3 Code",
-          schemes: ["t3code", "t3code-dev"],
+          schemes: ["t3cursor", "t3cursor-dev"],
         },
         {
           name: "Web site URL",
@@ -2963,7 +2963,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
       protocols: [
         {
           name: "T3 Code",
-          schemes: ["t3code", "t3code-dev"],
+          schemes: ["t3cursor", "t3cursor-dev"],
         },
       ],
       desktop: {

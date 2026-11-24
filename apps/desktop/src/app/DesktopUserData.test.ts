@@ -20,7 +20,7 @@ it.effect("uses an independent profile without touching the official profile", (
       isDevelopment: false,
       platform: "win32",
     });
-    assert.equal(result, path.join(directory, "cursor-custom"));
+    assert.equal(result, path.join(directory, "t3cursor"));
     assert.equal(yield* fs.readFileString(path.join(official, "Local State")), "official profile");
     assert.isFalse(yield* fs.exists(result));
   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),

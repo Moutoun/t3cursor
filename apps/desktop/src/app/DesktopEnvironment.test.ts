@@ -48,7 +48,7 @@ describe("DesktopEnvironment", () => {
       });
 
       assert.equal(environment.appRoot, "/install/resources/app.asar");
-      assert.equal(environment.appUserModelId, "local.codeatelier");
+      assert.equal(environment.appUserModelId, "com.t3cursor.app");
       assert.equal(environment.serverRoot, "/install/resources/server.asar");
       assert.equal(
         environment.backendEntryPath,
@@ -69,8 +69,8 @@ describe("DesktopEnvironment", () => {
       );
       const production = yield* makeEnvironment();
 
-      assert.equal(development.stateDir, "/Users/alice/.t3-custom/dev");
-      assert.equal(production.stateDir, "/Users/alice/.t3-custom/userdata");
+      assert.equal(development.stateDir, "/Users/alice/.t3cursor/dev");
+      assert.equal(production.stateDir, "/Users/alice/.t3cursor/userdata");
     }),
   );
 });
