@@ -161,7 +161,7 @@ const runStubbedDesktop = (stub: StubbedDesktop) =>
           registerDesktopProtocol: () => Effect.void,
         } as unknown as ElectronProtocol.ElectronProtocol["Service"]),
         Effect.provideService(DesktopLegacyLocalStorage.DesktopLegacyLocalStorage, {
-          load: () => Effect.void,
+          load: () => Effect.die("desktop startup must not read the official legacy profile"),
         } as unknown as DesktopLegacyLocalStorage.DesktopLegacyLocalStorage["Service"]),
         Effect.provideService(DesktopSnapShot.DesktopSnapShot, {
           initialize: Effect.void,
