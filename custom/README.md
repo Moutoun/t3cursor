@@ -31,8 +31,9 @@ command never resets or deletes user data. Neither command is connected to Setti
 - `custom/update-upstream.mjs`: tested source-update and rollback commands.
 - `custom/README.md`: maintenance notes for this checkout.
 - `apps/desktop/src/app/DesktopStatePaths.ts`: the desktop backend defaults to
-  `~/.t3cursor`, keeping its state separate from the official app. An explicit
-  `T3CODE_HOME` still overrides this default.
+  `~/.t3cursor`, keeping its state separate from the official app. The packaged
+  desktop app uses `T3CURSOR_HOME` for an explicit override and ignores inherited
+  `T3CODE_HOME` to avoid accidentally opening the official data directory.
 - `apps/desktop/src/app/DesktopUserData.ts`: custom Electron profiles are separate
   from official profiles; no official browser data is copied automatically. Installer
   identity isolation has not yet been verified with an installed build.

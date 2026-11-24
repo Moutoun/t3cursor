@@ -34,7 +34,7 @@ jobs:
           . "$env:VP_HOME\env.ps1"
           vp env exec --node 26.13.1 vp test run apps/desktop/src/app/DesktopEnvironment.test.ts apps/desktop/src/app/DesktopUserData.test.ts apps/desktop/src/electron/ElectronProtocol.test.ts packages/shared/src/codexAuthHandoff.test.ts
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          vp env exec --node 26.13.1 node --test custom/update-upstream.test.mjs
+          vp env exec --node 26.13.1 node --test custom/boot.test.mjs custom/update-upstream.test.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build Windows installer
         shell: pwsh

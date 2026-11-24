@@ -14,7 +14,7 @@ vp install
 vp run dev
 ```
 
-Use a separate data directory when developing alongside T3 Code. The desktop customization defaults to `~/.t3cursor`; `T3CODE_HOME` overrides it. T3Cursor uses a separate Electron profile. Existing T3 Code data is not migrated automatically.
+Use a separate data directory when developing alongside T3 Code. The packaged desktop app defaults to `~/.t3cursor`; `T3CURSOR_HOME` overrides it. T3Cursor uses a separate Electron profile. Existing T3 Code data is not migrated automatically.
 
 ## Upstream maintenance
 
