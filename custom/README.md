@@ -16,3 +16,7 @@ source merge or rollback mechanism has been implemented yet.
 
 - `custom/check-upstream.mjs`: read-only upstream check.
 - `custom/README.md`: maintenance notes for this checkout.
+- `apps/desktop/src/app/DesktopStatePaths.ts`: the desktop backend defaults to
+  `~/.t3-custom`, keeping its state separate from the official app. An explicit
+  `T3CODE_HOME` still overrides this default. Electron profile and installer identity
+  isolation are not yet implemented.
