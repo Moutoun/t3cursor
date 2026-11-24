@@ -1,8 +1,20 @@
-import type { EnvironmentId, ThreadContextRecord } from "@t3tools/contracts";
+import type {
+  EnvironmentId,
+  ProviderInteractionMode,
+  ThreadContextRecord,
+} from "@t3tools/contracts";
 import { msg } from "gt-react";
 import { m, type MessageResolver } from "../../i18n/messages";
 import { collectInlineContextIds } from "../../lib/composerContextReferences";
 import type { ComposerThreadDraftState } from "../../composerDraftStore";
+
+export function resolveSendInteractionMode(input: {
+  supportsPlan: boolean;
+  draft: ProviderInteractionMode | null | undefined;
+  thread: ProviderInteractionMode | null | undefined;
+}): ProviderInteractionMode {
+  return input.supportsPlan ? (input.draft ?? input.thread ?? "default") : "default";
+}
 
 /** Compare immutable user content without copying image bytes or upload metadata. */
 export function composerDraftContentChanged(

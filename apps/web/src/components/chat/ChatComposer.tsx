@@ -2691,53 +2691,73 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       ? 0
       : expandedControlsIconOnlyBlockCount;
   const composerControls = (
-    <ComposerControlsBar
-      environmentId={environmentId}
-      workspaceCwd={gitCwd}
-      routeKind={typeof composerDraftTarget === "string" ? "draft" : routeKind}
-      routeThreadRef={routeThreadRef}
-      draftId={typeof composerDraftTarget === "string" ? composerDraftTarget : draftId}
-      selectedProvider={selectedProvider}
-      selectedInstanceId={selectedInstanceId}
-      selectedModel={selectedModel}
-      selectedProviderModels={selectedProviderModels}
-      composerModelOptions={composerModelOptions}
-      reportedModelSelection={reportedModelSelection}
-      promptUltrathink={promptUltrathink}
-      onPromptEdit={editPromptFromTraitsStable}
-      compatibleRuntimeMode={compatibleRuntimeMode}
-      defaultRuntimeMode={props.defaultRuntimeMode}
-      compatibleRuntimeModeOptions={compatibleRuntimeModeOptions}
-      handleRuntimeModeChange={handleRuntimeModeChange}
-      composerControlsCollapsed={composerControlsCollapsed}
-      effortDisplay={settings.effortDisplay}
-      permissionsShownInStrip={props.permissionsShownInStrip}
-      composerControlsHidden={composerMenusClosed}
-      restingHiddenBlockCount={restingHiddenBlockCount}
-      iconOnlyBlockCount={iconOnlyBlockCount}
-      showProviderUnavailable={showProviderUnavailable}
-      providerSetupInstanceId={providerSetupInstanceId}
-      onOpenProviderSetup={onOpenProviderSetup}
-      providerCatalogPending={providerCatalogPending}
-      isSendBusy={isSendBusy}
-      multipleModelsEnabled={routeKind === "draft" && supportsMultipleModels}
-      multipleModelSelections={multipleModelSelections}
-      onMultipleModelSelectionsChange={handleMultipleModelSelectionsChangeStable}
-      selectedModelSelection={selectedModelSelection}
-      onProviderModelSelect={onProviderModelSelect}
-      activeThreadModelSelection={activeThreadModelSelection}
-      selectedModelForPickerWithCustomFallback={selectedModelForPickerWithCustomFallback}
-      lockedProvider={lockedProvider}
-      lockedContinuationGroupKey={lockedContinuationGroupKey}
-      providerInstanceEntries={providerInstanceEntries}
-      keybindings={keybindings}
-      modelOptionsByInstance={modelOptionsByInstance}
-      terminalOpen={terminalOpen}
-      modelPickerOpen={isComposerModelPickerOpen}
-      onModelPickerOpenChange={setIsComposerModelPickerOpen}
-      modelPickerIconClassName={composerProviderState.modelPickerIconClassName}
-      getModelDisabledReason={getModelDisabledReason}
-    />
+    <>
+      {selectedProviderStatus?.showInteractionModeToggle && multipleModelSelections === null ? (
+        <select
+          aria-label={gt("Interaction mode")}
+          className="h-8 rounded-md bg-transparent px-2 text-xs text-foreground"
+          value={composerDraft?.interactionMode ?? activeThread?.interactionMode ?? "default"}
+          onChange={(event) =>
+            useComposerDraftStore
+              .getState()
+              .setInteractionMode(
+                composerDraftTarget,
+                event.target.value === "plan" ? "plan" : "default",
+              )
+          }
+        >
+          <option value="default">{gt("Agent")}</option>
+          <option value="plan">{gt("Plan")}</option>
+        </select>
+      ) : null}
+      <ComposerControlsBar
+        environmentId={environmentId}
+        workspaceCwd={gitCwd}
+        routeKind={typeof composerDraftTarget === "string" ? "draft" : routeKind}
+        routeThreadRef={routeThreadRef}
+        draftId={typeof composerDraftTarget === "string" ? composerDraftTarget : draftId}
+        selectedProvider={selectedProvider}
+        selectedInstanceId={selectedInstanceId}
+        selectedModel={selectedModel}
+        selectedProviderModels={selectedProviderModels}
+        composerModelOptions={composerModelOptions}
+        reportedModelSelection={reportedModelSelection}
+        promptUltrathink={promptUltrathink}
+        onPromptEdit={editPromptFromTraitsStable}
+        compatibleRuntimeMode={compatibleRuntimeMode}
+        defaultRuntimeMode={props.defaultRuntimeMode}
+        compatibleRuntimeModeOptions={compatibleRuntimeModeOptions}
+        handleRuntimeModeChange={handleRuntimeModeChange}
+        composerControlsCollapsed={composerControlsCollapsed}
+        effortDisplay={settings.effortDisplay}
+        permissionsShownInStrip={props.permissionsShownInStrip}
+        composerControlsHidden={composerMenusClosed}
+        restingHiddenBlockCount={restingHiddenBlockCount}
+        iconOnlyBlockCount={iconOnlyBlockCount}
+        showProviderUnavailable={showProviderUnavailable}
+        providerSetupInstanceId={providerSetupInstanceId}
+        onOpenProviderSetup={onOpenProviderSetup}
+        providerCatalogPending={providerCatalogPending}
+        isSendBusy={isSendBusy}
+        multipleModelsEnabled={routeKind === "draft" && supportsMultipleModels}
+        multipleModelSelections={multipleModelSelections}
+        onMultipleModelSelectionsChange={handleMultipleModelSelectionsChangeStable}
+        selectedModelSelection={selectedModelSelection}
+        onProviderModelSelect={onProviderModelSelect}
+        activeThreadModelSelection={activeThreadModelSelection}
+        selectedModelForPickerWithCustomFallback={selectedModelForPickerWithCustomFallback}
+        lockedProvider={lockedProvider}
+        lockedContinuationGroupKey={lockedContinuationGroupKey}
+        providerInstanceEntries={providerInstanceEntries}
+        keybindings={keybindings}
+        modelOptionsByInstance={modelOptionsByInstance}
+        terminalOpen={terminalOpen}
+        modelPickerOpen={isComposerModelPickerOpen}
+        onModelPickerOpenChange={setIsComposerModelPickerOpen}
+        modelPickerIconClassName={composerProviderState.modelPickerIconClassName}
+        getModelDisabledReason={getModelDisabledReason}
+      />
+    </>
   );
   // An open question owns the space above the composer. Only a machine problem,
   // which is why an answer could not go through, stays beside it.

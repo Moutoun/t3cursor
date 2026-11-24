@@ -11,7 +11,20 @@ import {
   loadBalancingSendWarning,
   multipleModelSendBlock,
   referencedThreadContexts,
+  resolveSendInteractionMode,
 } from "./composerSend.logic";
+
+it("uses the chosen plan only when the selected provider supports it", () => {
+  expect(resolveSendInteractionMode({ supportsPlan: true, draft: "plan", thread: "default" })).toBe(
+    "plan",
+  );
+  expect(resolveSendInteractionMode({ supportsPlan: true, draft: null, thread: "plan" })).toBe(
+    "plan",
+  );
+  expect(resolveSendInteractionMode({ supportsPlan: false, draft: "plan", thread: "plan" })).toBe(
+    "default",
+  );
+});
 
 const local = EnvironmentId.make("local");
 const remote = EnvironmentId.make("remote");

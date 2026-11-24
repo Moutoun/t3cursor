@@ -62,7 +62,7 @@ import {
   type ComposerSubmissionIntent,
   collapseExpandedComposerCursor,
 } from "../../composer-logic";
-import { type ChatMessage, DEFAULT_INTERACTION_MODE } from "../../types";
+import type { ChatMessage } from "../../types";
 import { recordPromptSent } from "../GitHubStarPrompt";
 import { stackedThreadToast, toastManager } from "../ui/toast";
 import { writeTextToClipboard } from "~/hooks/useCopyToClipboard";
@@ -107,6 +107,7 @@ import {
   loadBalancingSendWarning,
   multipleModelSendBlock,
   referencedThreadContexts,
+  resolveSendInteractionMode,
 } from "./composerSend.logic";
 import { useMultipleModelSend } from "./useMultipleModelSend";
 import type { SideChatMessage } from "./useSideChat";
@@ -985,6 +986,16 @@ export function useComposerSend(input: ComposerSendInput) {
       return;
     }
     const threadIdForSend = activeThread.id;
+    const canPlan =
+      providerInstanceEntries.find(
+        (entry) => entry.instanceId === ctxSelectedModelSelection.instanceId,
+      )?.snapshot.showInteractionModeToggle === true;
+    const interactionMode = resolveSendInteractionMode({
+      supportsPlan: canPlan,
+      draft: useComposerDraftStore.getState().getComposerDraft(composerDraftTarget)
+        ?.interactionMode,
+      thread: activeThread.interactionMode,
+    });
     const sendSnapshot = snapshotComposerSend({
       prompt: promptForSend,
       images: composerImages,
@@ -1454,7 +1465,7 @@ export function useComposerSend(input: ComposerSendInput) {
           ? { branch: localCheckoutBranchMismatch.currentBranch }
           : {}),
         runtimeMode,
-        interactionMode: DEFAULT_INTERACTION_MODE,
+        interactionMode,
       });
       if (settingsResult._tag === "Failure") {
         failure = settingsResult;
@@ -1487,7 +1498,7 @@ export function useComposerSend(input: ComposerSendInput) {
           },
           modelSelection: ctxSelectedModelSelection,
           runtimeMode,
-          interactionMode: DEFAULT_INTERACTION_MODE,
+          interactionMode,
         },
       });
       if (compactResult._tag === "Failure") {
@@ -1508,7 +1519,7 @@ export function useComposerSend(input: ComposerSendInput) {
                       title,
                       modelSelection: threadCreateModelSelection,
                       runtimeMode,
-                      interactionMode: DEFAULT_INTERACTION_MODE,
+                      interactionMode,
                       branch: activeThreadBranch,
                       worktreePath: activeThread.worktreePath,
                       createdAt: activeThread.createdAt,
@@ -1558,7 +1569,7 @@ export function useComposerSend(input: ComposerSendInput) {
           modelSelection: ctxSelectedModelSelection,
           titleSeed: title,
           runtimeMode,
-          interactionMode: DEFAULT_INTERACTION_MODE,
+          interactionMode,
           dispatchMode: turnDispatchMode,
           ...(freshArm === undefined ? {} : { freshContext: true }),
           ...(bootstrap ? { bootstrap } : {}),
