@@ -148,6 +148,7 @@ import {
 } from "./projectFilesQueryState";
 
 const NO_FILE_REVISION_ATOM = Atom.make(null);
+const MonacoFileEditor = lazy(() => import("./MonacoFileEditor"));
 
 interface FilePreviewPanelProps {
   environmentId: EnvironmentId;
@@ -1353,6 +1354,7 @@ export default function FilePreviewPanel({
     true,
     Schema.Boolean,
   );
+  const [useMonaco, setUseMonaco] = useLocalStorage("t3cursor.useMonaco", false, Schema.Boolean);
   const tableDelimiter =
     previewPath && attachment === undefined ? filePreviewDelimiter({ name: previewPath }) : null;
   const revealHandled =
@@ -1427,7 +1429,12 @@ export default function FilePreviewPanel({
   });
   const contentFocusRef = useRef<HTMLDivElement>(null);
   const fileEditorRef = useRef<FileEditor | null>(null);
+  const monacoFocusRef = useRef<(() => void) | null>(null);
   const focusEditorFromContent = () => {
+    if (useMonaco && document.activeElement === contentFocusRef.current) {
+      monacoFocusRef.current?.();
+      return;
+    }
     const editor = fileEditorRef.current;
     if (!editor || document.activeElement !== contentFocusRef.current) return;
     // Without a caret the editor focuses with no selection, so no caret shows and typing
@@ -1444,6 +1451,10 @@ export default function FilePreviewPanel({
     focusEditorFromContent();
   };
   const handleEditorChangeStable = useStableCallback(handleEditorChange);
+  const handleMonacoFocusReady = useStableCallback((focus: (() => void) | null) => {
+    monacoFocusRef.current = focus;
+    focusEditorFromContent();
+  });
   const focusEditorOnTreeRowClickOrEnter = (event: {
     nativeEvent: Event;
     altKey: boolean;
@@ -1647,6 +1658,15 @@ export default function FilePreviewPanel({
               onPress={() => setWordWrapOverride(!wordWrap)}
             >
               <WrapTextIcon className="size-3.5" />
+            </FileSurfaceAction>
+          ) : null}
+          {mayOpenEditor ? (
+            <FileSurfaceAction
+              label={useMonaco ? gt("Use review editor") : gt("Use Monaco editor")}
+              pressed={useMonaco}
+              onPress={() => setUseMonaco(!useMonaco)}
+            >
+              <Code2Icon className="size-3.5" />
             </FileSurfaceAction>
           ) : null}
           {copyableContents !== null ? (
@@ -1878,6 +1898,22 @@ export default function FilePreviewPanel({
                 onPostRender={onFilePostRender}
                 wordWrap={wordWrap}
               />
+            ) : useMonaco ? (
+              <Suspense fallback={<FileSurfaceLoading />}>
+                <MonacoFileEditor
+                  key={relativePath}
+                  environmentId={environmentId}
+                  cwd={cwd}
+                  relativePath={relativePath}
+                  contents={file.data.contents}
+                  resolvedTheme={resolvedTheme}
+                  wordWrap={wordWrap}
+                  revealLine={revealLine}
+                  revealRequestId={revealRequestId}
+                  onPendingChange={onPendingChange}
+                  onFocusReady={handleMonacoFocusReady}
+                />
+              </Suspense>
             ) : (
               <DiffWorkerPoolProvider>
                 <EditableFileSurface

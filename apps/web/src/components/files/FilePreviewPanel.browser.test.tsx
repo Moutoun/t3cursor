@@ -173,10 +173,11 @@ import FilePreviewPanel from "./FilePreviewPanel";
 const environmentId = EnvironmentId.make("markdown-preview-test");
 const threadRef = { environmentId, threadId: ThreadId.make("thread") };
 function setup() {
-  const keys = ["t3code.fileExplorerOpen", "t3code.renderMarkdown"];
+  const keys = ["t3code.fileExplorerOpen", "t3code.renderMarkdown", "t3cursor.useMonaco"];
   const previous = keys.map((key) => localStorage.getItem(key));
   localStorage.setItem(keys[0]!, "false");
   localStorage.setItem(keys[1]!, "true");
+  localStorage.setItem(keys[2]!, "false");
   state.file = null;
   state.optimistic = null;
   state.assetUrl = { _tag: "Loading" };
@@ -252,6 +253,21 @@ function deepActiveElement() {
 }
 
 describe("source file focus", () => {
+  it("opens Monaco from the existing file panel and can return to the review editor", async () => {
+    using _settings = setup();
+    state.file = {
+      relativePath: "server.ts",
+      contents: "const server = 1;\n",
+      byteLength: 18,
+      truncated: false,
+    };
+    await using screen = await render(filePreview("server.ts"));
+    await userEvent.click(screen.getByRole("button", { name: "Use Monaco editor" }));
+    await expect.element(screen.getByTestId("monaco-file-editor")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Use review editor" }));
+    await vi.waitFor(() => expect(screen.container.querySelector(".monaco-editor")).toBeNull());
+  });
+
   it("hands panel focus to the file's editor, which owns mod+f", async () => {
     using _settings = setup();
     const style = document.createElement("style");
