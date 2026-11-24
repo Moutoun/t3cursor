@@ -12807,5 +12807,9 @@
     ")"
   ],
   "33d18dda74f6d7b3": "Cancel stack auto-merge",
-  "012c67c7f1a99e33": "Auto-merge stack"
+  "012c67c7f1a99e33": "Auto-merge stack",
+  "ffb03f7e9c3d11ad": "Interaction mode",
+  "67733c48eaaec73a": "Plan",
+  "081b5031fce2ca3c": "Use review editor",
+  "3064a7d73369f5d0": "Use Monaco editor"
 }
